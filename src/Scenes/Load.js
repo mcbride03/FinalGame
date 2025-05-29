@@ -39,7 +39,7 @@ class Load extends Phaser.Scene {
 
       // ------ WALK ------
         // base
-        this.load.spritesheet('walk_bod', 'Sunnyside_World_Assets/Characters/Human/Walking/base_walk_strip8.png', {
+        this.load.spritesheet('walk_bod', 'Sunnyside_World_Assets/Characters/Human/WALKING/base_walk_strip8.png', {
             frameWidth: 96,
             frameHeight: 64
         });
