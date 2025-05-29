@@ -5,6 +5,9 @@ class Load extends Phaser.Scene {
     }
 
     preload() {
+        this.load.plugin('rextagtextplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextagtextplugin.min.js', true);
+        this.load.plugin('rextexttypingplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexttypingplugin.min.js', true);  
+
         this.load.setPath("./assets/");
 
         // Load character spritesheet
@@ -14,8 +17,11 @@ class Load extends Phaser.Scene {
         // Load tilemap information
         this.load.image("kenney_Indoor", "kenney_roguelike-indoors/Tilesheets/roguelikeIndoor_transparent.png");
         this.load.image("kenney_RPG", "kenney_roguelike-rpg-pack/Spritesheet/roguelikeSheet_transparent.png");
-        this.load.image("kenny_UI", "kenney_ui-pack-rpg-expansion/Spritesheet/uipack_rpg_sheet.png");
+        this.load.atlasXML("kenney_UI_atlas", "kenney_ui-pack-rpg-expansion/Spritesheet/uipack_rpg_sheet.png", "kenney_ui-pack-rpg-expansion/Spritesheet/uipack_rpg_sheet.xml");
         this.load.image("sunnyside_tilemap", "Sunnyside_World_Assets/Tileset/spr_tileset_sunnysideworld_16px.png");
+
+        // Load bitmap
+        this.load.bitmapFont('font', '/pixel_fonts/fonts/round_6x6.png', '/pixel_fonts/fonts/round_6x6.xml');
         
 // ============================================== Load Player Spritesheets (includes animation frames) ======================================================================== //
 

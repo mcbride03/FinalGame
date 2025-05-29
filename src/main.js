@@ -10,7 +10,8 @@
 // game config
 let config = {
     parent: 'phaser-game',
-    type: Phaser.CANVAS,
+    type: Phaser.WEBGL,
+    scale: {autoCenter: Phaser.Scale.CENTER_BOTH},
     render: {
         pixelArt: true  // prevent pixel art from getting blurred when scaled
     },
