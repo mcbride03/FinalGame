@@ -24,7 +24,7 @@ class Game extends Phaser.Scene {
         this.tileset1 = this.map.addTilesetImage("tilemap_RPG", "tilemap_RPG");
         this.tileset = this.map.addTilesetImage("tilemap_new", "tilemap_new");
 
-// ============================== Create all layers meant to show under player ========================= //
+// ============================== Create all layers  ========================= //
         this.groundLayer = this.map.createLayer("Ground", this.tileset, 0, 0);
         this.pathLayer = this.map.createLayer("Paths", this.tileset, 0, 0);
         this.buildingLayer = this.map.createLayer("Buildings", this.tileset, 0, 0);
@@ -32,6 +32,10 @@ class Game extends Phaser.Scene {
         this.interior1Layer = this.map.createLayer("BuildingInterior1", this.tileset, 0, 0);
         this.interior2Layer = this.map.createLayer("BuildingInterior2", this.tileset, 0, 0);
         this.decorLayer = this.map.createLayer("Decor", this.tileset, 0, 0);
+        this.roofLayer0 = this.map.createLayer("Roofs0", this.tileset, 0, 0).setDepth(4);
+        this.roofLayer1 = this.map.createLayer("Roofs1", this.tileset, 0, 0).setDepth(5);
+        this.roofLayer2 = this.map.createLayer("Roofs2", this.tileset, 0, 0).setDepth(6);
+        this.chimneyLayer = this.map.createLayer("Chimney", this.tileset, 0, 0).setDepth(7);
 // ===================================================================================================== //
 
         
@@ -77,32 +81,24 @@ class Game extends Phaser.Scene {
         this.playerHair.play("idle_h");
 
         // Group Parts in a player container
-        my.sprite.player = this.add.container(100, 100, [this.playerBod, this.playerHair]);
-        // my.sprite.player.anims.play('idle');
-
-        this.roofLayer0 = this.map.createLayer("Roofs0", this.tileset, 0, 0);
-        this.roofLayer1 = this.map.createLayer("Roofs1", this.tileset, 0, 0);
-        this.roofLayer2 = this.map.createLayer("Roofs2", this.tileset, 0, 0);
-        this.chimneyLayer = this.map.createLayer("Chimney", this.tileset, 0, 0);
-
-
-        this.physics.world.enable(my.sprite.player);
-        let body = my.sprite.player.body;
+        my.sprite.player = this.add.container(100, 100, [this.playerBod, this.playerHair]).setDepth(2);
 
         // Set physics body properties
+        this.physics.world.enable(my.sprite.player);
+        let body = my.sprite.player.body;
         body.setCollideWorldBounds(true);
         body.setSize(16, 16);
         body.setOffset(-16 / 2, -16 / 2);
 
-// ================ Collision handler for player and layers ============================= //
+// ================ Collision handler for player and layers ============================ //
         this.physics.add.collider(my.sprite.player, this.buildingLayer);
         this.physics.add.collider(my.sprite.player, this.buildingWallLayer);
         this.physics.add.collider(my.sprite.player, this.pathLayer);
         this.physics.add.collider(my.sprite.player, this.interior1Layer);
         this.physics.add.collider(my.sprite.player, this.interior2Layer);
-// ====================================================================================== // 
+// ===================================================================================== //
 
-        // Simple camera to follow player
+        // Camera to follow player
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.startFollow(my.sprite.player, true, 0.25, 0.25); // (target, [,roundPixels][,lerpX][,lerpY])
         this.cameras.main.setDeadzone(75, 75);
@@ -112,7 +108,9 @@ class Game extends Phaser.Scene {
 
         cursors = this.input.keyboard.createCursorKeys();
 
-        this. dialogueBox = this.add.sprite(0, 0, "kenney_UI_atlas", "buttonLong_beige.png")
+// ================================== Dialogue Set-Up ================================== //
+
+        this.dialogueBox = this.add.sprite(0, 0, "kenney_UI_atlas", "buttonLong_beige.png")
             .setOrigin(0.5, 0.5)
             .setDepth(100)           // Draws on top
             .setVisible(false);
@@ -131,12 +129,20 @@ class Game extends Phaser.Scene {
 
         // Position the box at the bottom of the camera
         this.updateDialogueBoxPosition();
+// ===================================================================================== //
+
+        // NPC creation
+        this.npcBod = this.add.sprite(0, 0, "idle_bod", 0);
+        this.npcHair = this.add.sprite(0, 0, "idle_hair", 0);
+        this.Frank = new Npc(this, 443, 344, "idle_bod", "idle_hair", my.sprite.player, "idle", "idle_h");
+
+        // animated tile set-up
         this.animatedTiles.init(this.map);
-
-
     }
 
     update() {
+        // console.log(my.sprite.player.x + ", " + my.sprite.player.y);
+        this.Frank.update();
         this.updateDialogueBoxPosition();
         this.checkEnterBuilding();
         this.checkConversation();
