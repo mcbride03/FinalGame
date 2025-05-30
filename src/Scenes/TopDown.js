@@ -8,6 +8,7 @@ class Game extends Phaser.Scene {
         this.SCALE =  3.5;
         this.inBuilding = false;
         this.waitingForDialogue = false;
+        this.dialogueActive = false;
 
     }
     preload () {
@@ -106,47 +107,28 @@ class Game extends Phaser.Scene {
         
         this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
-        cursors = this.input.keyboard.createCursorKeys();
-
-// ================================== Dialogue Set-Up ================================== //
-
-        this.dialogueBox = this.add.sprite(0, 0, "kenney_UI_atlas", "buttonLong_beige.png")
-            .setOrigin(0.5, 0.5)
-            .setDepth(100)           // Draws on top
-            .setVisible(false);
-
-        // Create the dialogue text
-        this.dialogueText = this.add.bitmapText(100, 100, 'font', '', 16)
-        // this.dialogueText.setScrollFactor(0);
-        this.dialogueText.setDepth(101);
-        this.dialogueText.setVisible(true);
-        // this.dialogueText.setText("TESTING...");
-        this.dialogueText.setScale(.75);
-        this.dialogueText.setOrigin(0, 0); 
-        this.typing = this.plugins.get('rextexttypingplugin').add(this.dialogueText, {
-            speed: 50 // characters per second
-        });
-
-        // Position the box at the bottom of the camera
-        this.updateDialogueBoxPosition();
-// ===================================================================================== //
-
         // NPC creation
-        this.npcBod = this.add.sprite(0, 0, "idle_bod", 0);
-        this.npcHair = this.add.sprite(0, 0, "idle_hair", 0);
-        this.Frank = new Npc(this, 443, 344, "idle_bod", "idle_hair", my.sprite.player, "idle", "idle_h");
+        this.Frank = new Npc(this, 443, 344, "idle_bod", "idle_hair", my.sprite.player, "idle", "idle_h", [
+            "Hey there, traveler!",
+            "Don't go into the forest alone.",
+            "You might not come back!"
+        ]);
 
+        cursors = this.input.keyboard.createCursorKeys();
+        this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+        
         // animated tile set-up
         this.animatedTiles.init(this.map);
     }
 
     update() {
-        // console.log(my.sprite.player.x + ", " + my.sprite.player.y);
-        this.Frank.update();
-        this.updateDialogueBoxPosition();
+
+        // update building state
         this.checkEnterBuilding();
-        this.checkConversation();
-       
+
+        // update npcs
+        this.dialogueActive = this.Frank.update();
+
         // player movement
         my.sprite.player.body.setVelocity(0);
         if (!this.dialogueActive) {
@@ -178,68 +160,6 @@ class Game extends Phaser.Scene {
         } else if (cursors.down.isDown) {
             player.setVelocityY(this.MAX_SPEED);
         }
-    }
-    checkConversation() {
-        if (this.dialogueActive && Phaser.Input.Keyboard.JustDown(cursors.space)) {
-            if (this.typing.isRunning) {
-                this.typing.stop(); // Finish the line
-                this.waitingForDialogue = true; // Wait for NEXT space
-            } else if (this.waitingForDialogue) {
-                this.showNextLine(); // Now go to next line
-                this.waitingForDialogue = false;
-            }
-        }
-        if (!this.dialogueActive && Phaser.Input.Keyboard.JustDown(cursors.space)) {
-            this.startDialogue([
-                "Hey there, traveler!",
-                "Don't go into the forest alone.",
-                "You might not come back!"
-            ]);
-        }
-    }
-
-    updateDialogueBoxPosition() {
-        let cam = this.cameras.main;
-        const boxX = cam.scrollX + cam.width / 2// 2.25;
-        const boxY = cam.scrollY + cam.height / 1.66; // 70px from the bottom
-        const dialogueX = boxX - (this.dialogueBox.width - 10) / 2;
-        const dialogueY = boxY - (this.dialogueBox.height - 10) / 2;
-
-        this.dialogueBox.setPosition(boxX, boxY);
-        this.dialogueText.setPosition(dialogueX, dialogueY);
-    }
-    startDialogue(lines) {
-        this.waitingForAdvance = false;
-        this.dialogueLines = lines;
-        this.dialogueIndex = 0;
-
-        this.dialogueBox.setVisible(true);
-        this.dialogueText.setVisible(true);
-        this.showNextLine();
-
-        // lock player movement
-        this.dialogueActive = true;
-    }
-
-    showNextLine() {
-        if (this.dialogueIndex < this.dialogueLines.length) {
-            const line = this.dialogueLines[this.dialogueIndex];
-            this.typing.start(line);
-
-            // Wait for typing to finish before advancing
-            this.typing.once('complete', () => {
-                this.dialogueIndex++;
-                this.waitingForDialogue = true;
-            });
-        } else {
-            this.endDialogue();
-        } 
-    }
-
-    endDialogue() {
-        this.dialogueBox.setVisible(false);
-        this.dialogueText.setVisible(false);
-        this.dialogueActive = false;
     }
 
     checkEnterBuilding() {

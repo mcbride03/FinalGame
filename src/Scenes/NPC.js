@@ -7,43 +7,119 @@
 //      player ------------- my.sprite.player
 //      anim_b, anim_h ----- body, hair -> respective animation keys
 //      
-class Npc extends Phaser.Scene {
-    constructor(scene, x, y, texture, texture1, player, anim_b, anim_h) {
-        super(scene, x, y, texture, texture1);
+class Npc {
+    constructor(scene, x, y, textureB, textureH, player, animB, animH, dialogueLines = []) {
+        this.scene = scene;
+        this.dialogueLines = dialogueLines;
+        this.dialogueIndex = 0;
+        this.dialogueActive = false;
+        this.waitingForAdvance = false;
 
-        scene.texture_b = scene.add.sprite(0, 0, texture, 0);
-        scene.texture_h = scene.add.sprite(0, 0, texture1, 0);
-        // npc creation
-        this.npc = scene.add.container(x, y, [scene.texture_b, scene.texture_h]);
+        // Create visuals
+        this.spriteB = this.scene.add.sprite(0, 0, textureB, 0);
+        this.spriteH = this.scene.add.sprite(0, 0, textureH, 0);
+        this.spriteB.play(animB);
+        this.spriteH.play(animH);
 
-
-        //animation play
-        scene.texture_b.play(anim_b);
-        scene.texture_h.play(anim_h);
-
-        // physics and collision for npcs
-        scene.physics.world.enable(this.npc);
-        this.npc.body.setCollideWorldBounds(true)
-            .setSize(16, 20)
-            .setOffset(-16 / 2, -16 / 2);
+        this.npc = this.scene.add.container(x, y, [this.spriteB, this.spriteH]);
+        this.scene.physics.world.enable(this.npc);
+        this.npc.body.setSize(16, 20).setCollideWorldBounds(true).setOffset(-8, -10);
+        this.npc.body.moves = false;
         this.npc.setDepth(2);
-        scene.physics.add.collider(player, this.npc);
-        this.npc.body.moves = false;    // make npc immovable
+        this.scene.physics.add.collider(player, this.npc);
 
-    }
-    update(){
+        // Interaction zone
+        this.interactZone = this.scene.add.zone(x, y, 32, 32);
+        this.scene.physics.world.enable(this.interactZone);
+        this.interactZone.body.setAllowGravity(false).setImmovable(true);
+        this.inRange = false;
+        this.scene.physics.add.overlap(player, this.interactZone, () => {
+            this.inRange = true;
+        });
 
+        // Dialogue UI
+        this.dialogueBox = this.scene.add.sprite(0, 0, "kenney_UI_atlas", "buttonLong_beige.png")
+            .setOrigin(0.5)
+            .setDepth(100)
+            .setVisible(false);
+
+        this.dialogueText = this.scene.add.bitmapText(0, 0, 'font', '', 16)
+            .setOrigin(0, 0)
+            .setDepth(101)
+            .setScale(0.75)
+            .setVisible(false);
+
+        this.typing = this.scene.plugins.get('rextexttypingplugin').add(this.dialogueText, {
+            speed: 50
+        });
+
+        this.interactKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
     }
+
+    update() {
+        this.updateDialoguePosition();
+
+        if (this.inRange && Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+            if (!this.dialogueActive) {
+                this.startDialogue(this.dialogueLines);
+            } else {
+                if (this.typing.isRunning) {
+                    this.typing.stop();
+                    this.waitingForAdvance = true;
+                } else if (this.waitingForAdvance) {
+                    this.showNextLine();
+                    this.waitingForAdvance = false;
+                }
+            }
+        }
+        this.inRange = false;
+        return this.dialogueActive;
+    }
+
+    startDialogue(lines) {
+        this.dialogueActive = true;
+        this.dialogueLines = lines;
+        this.dialogueIndex = 0;
+
+        this.dialogueBox.setVisible(true);
+        this.dialogueText.setVisible(true);
+        this.showNextLine();
+    }
+
+    showNextLine() {
+        if (this.dialogueIndex < this.dialogueLines.length) {
+            const line = this.dialogueLines[this.dialogueIndex];
+            this.typing.start(line);
+            this.typing.once('complete', () => {
+                this.dialogueIndex++;
+                this.waitingForAdvance = true;
+            });
+        } else {
+            this.endDialogue();
+        }
+    }
+
+    endDialogue() {
+        this.dialogueBox.setVisible(false);
+        this.dialogueText.setVisible(false);
+        this.dialogueActive = false;
+    }
+
+    updateDialoguePosition() {
+        const cam = this.scene.cameras.main;
+        const x = cam.scrollX + cam.width / 2;
+        const y = cam.scrollY + cam.height / 1.66;
+
+        this.dialogueBox.setPosition(x, y);
+        this.dialogueText.setPosition(x - (this.dialogueBox.width - 10) / 2, y - (this.dialogueBox.height - 10) / 2);
+    }
+
     destroy() {
-        super.destroy();
+        this.npc.destroy();
+        this.spriteB.destroy();
+        this.spriteH.destroy();
+        this.interactZone.destroy();
+        this.dialogueBox.destroy();
+        this.dialogueText.destroy();
     }
-
-
-
-
-
-
-
-
-
 }
