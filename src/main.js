@@ -27,7 +27,7 @@ let config = {
     },
     width: 1440,
     height: 900,
-    scene: [Load, Game]
+    scene: [Load, Game, Forest]
 }
 
 var cursors;

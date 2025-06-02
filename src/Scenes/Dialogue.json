@@ -1,0 +1,35 @@
+{
+    "NPCs": {
+        "NPC_farmer": {
+            "Dialogue": [
+                "Ahhh, these carrots are perfect!",
+                "Hm I don't seem to recognize you. You're not from around here, are you?"
+            ]
+        },
+        "NPC_lumberer": {
+            "Dialogue": [
+                "Whew! This wood choppin' has me parched!",
+                "C'mere and help me out a little"
+            ]
+        },
+        "NPC_Frank": {
+            "Intro": [
+                "Hey there wanderer. My name is Frank.",
+                "Unfortunately our town Sunnyville is in\ndanger.",
+                "The Goblin in the Northern Forest\nthreatens us.",
+                "If I lend you my sword can you help us?",
+                "...",
+                "Thank you traveler! We will forever be\nindebted to you.",
+                "The sword is on that table. Please take\nit and save our town!",
+                "You can take the path that points north.\nit will lead you to the Goblin!"
+            ],
+            "AfterIntro": [
+                "The sword is on that table.",
+                "Please take the north-bound path and\nsave us!"
+            ],
+            "GoblinDead": [
+                "Thank you for saving us! Here is the key\nto the city!"
+            ]
+        }
+    }
+}

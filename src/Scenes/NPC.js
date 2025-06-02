@@ -8,12 +8,13 @@
 //      anim_b, anim_h ----- body, hair -> respective animation keys
 //      
 class Npc {
-    constructor(scene, x, y, textureB, textureH, player, animB, animH, dialogueLines = []) {
+    constructor(scene, x, y, textureB, textureH, player, animB, animH, dialogueData, npcId) {
         this.scene = scene;
-        this.dialogueLines = dialogueLines;
         this.dialogueIndex = 0;
         this.dialogueActive = false;
         this.waitingForAdvance = false;
+        this.npcId = npcId;
+        this.dialogueData = dialogueData;
 
         // Create visuals
         this.spriteB = this.scene.add.sprite(0, 0, textureB, 0);
@@ -46,7 +47,7 @@ class Npc {
         this.dialogueText = this.scene.add.bitmapText(0, 0, 'font', '', 16)
             .setOrigin(0, 0)
             .setDepth(101)
-            .setScale(0.75)
+            .setScale(0.5)
             .setVisible(false);
 
         this.typing = this.scene.plugins.get('rextexttypingplugin').add(this.dialogueText, {
@@ -76,10 +77,13 @@ class Npc {
         return this.dialogueActive;
     }
 
-    startDialogue(lines) {
-        this.dialogueActive = true;
+    startDialogue() {
+        const data = this.dialogueData[this.npcId];
+        const lines = this.scene.goblinDefeated ? data.GoblinDead : (this.scene.hasTalkedtoFrank ? data.AfterIntro : data.Intro);
+
         this.dialogueLines = lines;
         this.dialogueIndex = 0;
+        this.dialogueActive = true;
 
         this.dialogueBox.setVisible(true);
         this.dialogueText.setVisible(true);
@@ -103,6 +107,12 @@ class Npc {
         this.dialogueBox.setVisible(false);
         this.dialogueText.setVisible(false);
         this.dialogueActive = false;
+        this.hasTalked = true;
+
+        if (this.npcId === "NPC_Frank") {
+            this.scene.canPickupSword = this.hasTalked;
+            this.scene.hasTalkedtoFrank = this.hasTalked;
+        }
     }
 
     updateDialoguePosition() {

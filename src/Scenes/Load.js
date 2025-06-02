@@ -8,8 +8,11 @@ class Load extends Phaser.Scene {
         this.load.plugin('rextagtextplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextagtextplugin.min.js', true);
         this.load.plugin('rextexttypingplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexttypingplugin.min.js', true);  
 
+        this.load.json('dialogueData', 'src/Scenes/Dialogue.json');
+
         this.load.setPath("./assets/");
 
+        this.load.image('sword', 'Sunnyside_World_Assets/UI/sword.png');
         // Load character spritesheet
         this.load.atlas("topdown_characters", "/kenney_roguelike-characters/Spritesheet/roguelikeChar_transparent.png", "roguelikeChar_transparent.json")
         // this.load.atlas("sunny_character_idle","/Sunnyside_World_Assets/Chracters/Human/IDLE/base_idle_strip9.png", "")
@@ -21,7 +24,7 @@ class Load extends Phaser.Scene {
         this.load.image("sunnyside_tilemap", "Sunnyside_World_Assets/Tileset/spr_tileset_sunnysideworld_16px.png");
 
         // Load bitmap
-        this.load.bitmapFont('font', '/pixel_fonts/fonts/round_6x6.png', '/pixel_fonts/fonts/round_6x6.xml');
+        this.load.bitmapFont('font', '/pixel_fonts/fonts/minogram_6x10.png', '/pixel_fonts/fonts/minogram_6x10.xml');
         
 // ============================================== Load Player Spritesheets (includes animation frames) ======================================================================== //
 
@@ -36,6 +39,16 @@ class Load extends Phaser.Scene {
             frameWidth: 96,
             frameHeight: 64
         });
+        // tool
+        this.load.spritesheet('idle_tool', 'Sunnyside_World_Assets/Characters/Human/IDLE/tools_idle_strip9.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // goblin
+        this.load.spritesheet('idle_gob', 'Sunnyside_World_Assets/Characters/Goblin/PNG/spr_idle_strip9.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        })
 
       // ------ WALK ------
         // base
@@ -48,11 +61,45 @@ class Load extends Phaser.Scene {
             frameWidth: 96,
             frameHeight: 64
         });
+        // goblin
+        this.load.spritesheet('walk_gob', 'Sunnyside_World_Assets/Characters/Goblin/PNG/spr_walk_strip8.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        })
 
+      // ----- ATTACK -----
+        // base
+        this.load.spritesheet('attack_bod', 'Sunnyside_World_Assets/Characters/Human/ATTACK/base_attack_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // hair
+        this.load.spritesheet('attack_hair', 'Sunnyside_World_Assets/Characters/Human/ATTACK/curlyhair_attack_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // sword
+        this.load.spritesheet('attack_tool', 'Sunnyside_World_Assets/Characters/Human/ATTACK/tools_attack_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // goblin
+        this.load.spritesheet('attack_gob', 'Sunnyside_World_Assets/Characters/Goblin/PNG/spr_attack_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        })
 // ====================================================================================================================================================================== //
+
+        // Load keypress animation spritesheets
+        this.load.spritesheet('SPACE', 'SimpleKeys/SimpleKeys/Jumbo/Light/Spritesheets/SPACE.png', {
+            frameWidth: 98,
+            frameHeight: 21
+        });
+
 
 
         this.load.tilemapTiledJSON("topDown-level-1", "topDown-level-1.tmj");   // Tilemap in JSON
+        this.load.tilemapTiledJSON("topDown-level-2", "topDown-level-2.tmj");   // Tilemap in JSON
 
         // Load the tilemap as a spritesheet
         this.load.spritesheet("tilemap_RPG", "kenney_roguelike-rpg-pack/Spritesheet/roguelikeSheet_transparent.png", {
@@ -84,6 +131,21 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
 
+        // idle tool animation
+        this.anims.create({
+            key: 'idle_t',
+            frames: this.anims.generateFrameNumbers('idle_tool', { start: 0, end: 8}),
+            frameRate: 12
+        });
+
+        // idle goblin animation
+        this.anims.create({
+            key: 'idle_g',
+            frames: this.anims.generateFrameNumbers('idle_gob', {start: 0, end: 7}),
+            frameRate: 12,
+            repeat: -1
+        });
+
         // walk body animation
         this.anims.create({
             key: 'walk',
@@ -92,6 +154,7 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
         
+        // walk hair animation
         this.anims.create({
             key: 'walk_h',
             frames: this.anims.generateFrameNumbers('walk_hair', { start: 0, end: 7 }),
@@ -99,7 +162,49 @@ class Load extends Phaser.Scene {
             repeat: -1
         });
 
+        // walk goblin animation
+        this.anims.create({
+            key: 'walk_g',
+            frames: this.anims.generateFrameNumbers('walk_gob', {start: 0, end: 7}),
+            frameRate:12,
+            repeat: -1
+        });
 
+        // attack body animation
+        this.anims.create({
+            key: 'attack',
+            frames: this.anims.generateFrameNumbers('attack_bod', { start: 0, end: 9 }),
+            frameRate: 12
+        });
+
+        // attack hair animation
+        this.anims.create({
+            key: 'attack_h',
+            frames: this.anims.generateFrameNumbers('attack_hair', { start: 0, end: 9 }),
+            frameRate: 12
+        });
+
+        // attack tool animation
+        this.anims.create({
+            key: 'attack_t',
+            frames: this.anims.generateFrameNumbers('attack_tool', {start: 0, end: 9}),
+            frameRate: 12
+        });     
+        
+        // attack goblin animation
+        this.anims.create({
+            key: 'attack_g',
+            frames: this.anims.generateFrameNumbers('attack_gob', {start: 0, end: 8}),
+            frameRate:12
+        });   
+        
+        // space animation
+        this.anims.create({
+            key: 'space',
+            frames: this.anims.generateFrameNumbers('SPACE', {start: 0, end: 2}),
+            frameRate: 6,
+            repeat: 2
+        });
 
         this.scene.start("gameScene");
     }
