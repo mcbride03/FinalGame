@@ -28,27 +28,51 @@ class Forest extends Phaser.Scene {
         this.pathLayer = this.map.createLayer("Paths", this.tileset, 0, 0);
         this.treeLayer = this.map.createLayer("Trees", this.tileset, 0, 0);
 
+        this.grid = this.layersToGrid([this.pathLayer]);
+        this.finder = new EasyStar.js();
+        this.finder.setGrid(this.grid);
+        this.finder.setAcceptableTiles([0, 522, 523, 460, 68, 458, 459]);
+
         // collision
         this.treeLayer.setCollisionByProperty({ collides: true });
 
+        this.enemies = this.physics.add.group();
 
-        this.playerObj = new Player(this, this.map.widthInPixels / 2, this.map.heightInPixels - 25, { hasSword: this.hasSword });
+        this.playerObj = new Player(this, this.map.widthInPixels / 2, this.map.heightInPixels - 25, { hasSword: this.hasSword }, this.enemies);
         this.player = this.playerObj.getContainer();
+        this.player.setDepth(3);
 
         this.physics.add.collider(this.player, this.treeLayer);
 
         if (!this.goblinDefeated) {
-            this.goblin = this.physics.add.sprite(this.map.widthInPixels / 2, this.map.heightInPixels / 4, "idle_gob");
-            this.goblin.body.setSize(16, 16);
-            this.goblin.play("idle_g");
+            this.goblinSpawnX = this.map.widthInPixels / 2;
+            this.goblinSpawnY = this.map.heightInPixels / 4;
+            this.goblin = new Enemy(this, this.goblinSpawnX, this.goblinSpawnY, "idle_gob", this.playerObj, 
+                ["idle_g", "walk_g", "attack_g", "damage_g", "death_g"], "Enemy_Goblin", this.finder, this.map, this.grid);
+            this.enemies.add(this.goblin.enemy);
+            this.goblin.enemy.body.setImmovable(true);
         }
         
-        if (this.goblin) {
-            this.physics.add.overlap(this.player, this.goblin, () => {
-                this.goblin.destroy();
-                this.goblinDefeated = true;
-            });
-        }
+        this.physics.add.collider(this.player, this.enemies, (player, enemySprite) => {
+            const enemy = enemySprite.getData('ref');
+            if (enemy && this.playerObj.canBeHit && !this.playerObj.isDead) {
+                this.playerObj.health -= 25;
+                this.playerObj.takeDmg = true;
+                this.playerObj.canBeHit = false;
+
+                // Knockback!
+                this.playerObj.knockback(enemySprite.x, enemySprite.y);
+            }   
+        });
+
+        this.physics.add.overlap(this.playerObj.attackHitbox, this.enemies, (hitbox, enemySprite) => {
+            const enemy = enemySprite.getData('ref');
+            if (enemy && enemy.canBeHit) {
+                this.time.delayedCall(300, () => {
+                    enemy.takeDamage(this.playerObj.swordDamage); 
+                });
+            }
+        });
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.startFollow(this.player, true, 0.25, 0.25);
@@ -58,10 +82,37 @@ class Forest extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
         this.cursors = this.input.keyboard.createCursorKeys();
+
+// ************** UI CREATION *****************************
+        this.UI_space = this.add.sprite(-100, -100, 'SPACEKEY', 0)
+            .setOrigin(0, 0)
+            .setScale(0.5)
+            .setDepth(100);
+        this.UI_attack = this.add.bitmapText(-100, -100, 'font', 'Attack', 16)
+            .setOrigin(0, 0)
+            .setScale(0.5)
+            .setTint(0xffffff)
+            .setDepth(100);
+        
+        this.UI_z = this.add.sprite(10, 10, 'ZKEY', 0)
+            .setOrigin(0, 0)
+            .setScale(0.5)
+            .setDepth(100);    
+        this.UI_interact = this.add.bitmapText(10, 10, 'font', 'Interact', 16)
+            .setOrigin(0, 0)
+            .setScale(0.5)
+            .setTint(0xffffff)
+            .setDepth(100);
+// ***********************************************************************
     }
 
     update() {
+        this.updateUI();
         this.playerObj.update();
+
+        if (this.goblin) {
+            this.goblin.update();
+        }
 
         if (this.goblinDefeated && this.player.body.y >= 455) {
             this.scene.start("gameScene", {
@@ -72,163 +123,37 @@ class Forest extends Phaser.Scene {
             });
         }
     }
-}
-
-
-/* class Forest extends Phaser.Scene {
-    constructor() {
-        super("forestScene");
-    }
-    init(data) {
-        this.MAX_SPEED = 75;
-        this.SCALE =  3.5;
-        this.inBuilding = false;
-        this.waitingForDialogue = false;
-        this.dialogueActive = false;
-        this.isAttacking = false;
-
-        // Import from gameScene
-        this.hasSword = data.hasSword || false;
-        this.canPickupSword = data.canPickupSword || false;
-        this.hasTalkedToFrank = data.hasTalkedToFrank || false;
-        this.goblinDefeated = data.goblinDefeated || false;
-    }
-    preload () {
-        // animated tile setup
-        this.load.scenePlugin('AnimatedTiles', './lib/AnimatedTiles.js', 'animatedTiles', 'animatedTiles');
+    updateUI() {
+        const cam = this.cameras.main;
+        const x = cam.scrollX + cam.width / 2.75;
+        const y = cam.scrollY + cam.height / 1.6;
+        if (!this.playerObj.getHasSword()) {
+            this.UI_interact.setPosition(x + this.UI_z.width, y);
+            this.UI_z.setPosition(x, y);
+            return;
+        }
+        this.UI_attack.setPosition(x + this.UI_space.width / 1.66, y);
+        this.UI_space.setPosition(x, y);
+        this.UI_interact.setPosition(x + this.UI_z.width, y - 20);
+        this.UI_z.setPosition(x, y - 20);
     }
 
-    create() {
-        this.map = this.add.tilemap("topDown-level-2", 16, 16, 45, 25);
-
-        // Add a tileset to the map
-        // First parameter: name we gave the tileset in Tiled
-        // Second parameter: key for the tilesheet (from this.load.image in Load.js)
-        //this.tileset1 = this.map.addTilesetImage("tilemap_RPG", "tilemap_RPG");
-        this.tileset = this.map.addTilesetImage("tilemap_new", "tilemap_new");
-
-// ============================== Create all layers  =================================================== //
-        this.groundLayer = this.map.createLayer("Ground", this.tileset, 0, 0);
-        this.pathLayer = this.map.createLayer("Paths", this.tileset, 0, 0);
-        this.treeLayer = this.map.createLayer("Trees", this.tileset, 0, 0);
-// ===================================================================================================== //
-
-        
-        // Make layers collidable
-        this.treeLayer.setCollisionByProperty({
-            collides: true
-        });
-
-        // Create and store parts of player sprite
-        this.playerBod = this.add.sprite(0, 0, "idle_bod", 0);
-        this.playerHair = this.add.sprite(0, 0, "idle_hair", 0);
-        this.playerTool = this.add.sprite(0, 0, "idle_ tool", 0);
-        this.playerTool.setVisible(false);
-
-        // Start idle animations
-        this.playerBod.play("idle");
-        this.playerHair.play("idle_h");
-
-        // Group Parts in a player container
-        my.sprite.player = this.add.container(this.map.widthInPixels/2, this.map.heightInPixels - 25, [this.playerBod, this.playerHair, this.playerTool]).setDepth(2);
-
-        // Set physics body properties
-        this.physics.world.enable(my.sprite.player);
-        let body = my.sprite.player.body;
-        body.setCollideWorldBounds(true);
-        body.setSize(16, 16);
-        body.setOffset(-16 / 2, -16 / 2);
-
-        // collision
-        this.physics.add.collider(my.sprite.player, this.treeLayer);
-
-        // Camera to follow player
-        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        this.cameras.main.startFollow(my.sprite.player, true, 0.25, 0.25); // (target, [,roundPixels][,lerpX][,lerpY])
-        this.cameras.main.setDeadzone(75, 75);
-        this.cameras.main.setZoom(this.SCALE);
-        
-        this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-
-        // NPC creation
-        if(!this.goblinDefeated) {
-            this.goblin = this.add.sprite(this.map.widthInPixels/2, this.map.heightInPixels/4, 'idle_gob');
-            this.goblin.play("idle_g");
+    layersToGrid(layers) {
+        let grid = [];
+        for (let y = 0; y < this.map.height; y++) {
+            let row = [];
+            for (let x = 0; x < this.map.width; x++) {
+                let tileId = 0;
+                for (let layer of layers) {
+                    const tile = layer.getTileAt(x, y);
+                    if (tile) {
+                        tileId = tile.index;
+                    }
+                }
+                row.push(tileId);
+            }
+            grid.push(row);
         }
-
-        cursors = this.input.keyboard.createCursorKeys();
-        this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
-        
-        // animated tile set-up
-        this.animatedTiles.init(this.map);
-    }
-
-    update() {
-        console.log(my.sprite.player.body.x + ' ' + my.sprite.player.body.y + ' ' + this.goblinDefeated);
-
-        // player movement
-        my.sprite.player.body.setVelocity(0);
-        if (!this.dialogueActive && !this.isAttacking) {
-            this.updatePlayerMovement();
-        }
-        // player attack
-        if (!this.dialogueActive && this.hasSword && Phaser.Input.Keyboard.JustDown(cursors.space)) {
-            this.updatePlayerAttack();
-        }
-
-        // player leaves scene
-        if (this.goblinDefeated && (my.sprite.player.body.y >= 455)) {
-            this.scene.start("gameScene", {
-                hasSword: this.hasSword,
-                canPickupSword: this.canPickupSword,
-                hasTalkedToFrank: this.hasTalkedToFrank,
-                goblinDefeated: this.goblinDefeated
-            });
-        }
-
-    }
-
-    updatePlayerAttack(){
-        if (!this.isAttacking) {
-            this.isAttacking = true;
-            this.playerTool.setVisible(true);
-            this.playerBod.play("attack");
-            this.playerHair.play("attack_h");
-            this.playerTool.play("attack_t");
-            this.playerBod.once("animationcomplete", () => {
-                this.isAttacking = false;
-                this.playerTool.setVisible(false);
-            });
-        }
-        
-    }
-
-    updatePlayerMovement() {
-        let player = my.sprite.player.body;
-        if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown) {
-            this.playerBod.play("walk", true);
-            this.playerHair.play("walk_h", true);
-        } else {
-            this.playerBod.play("idle", true);
-            this.playerHair.play("idle_h", true);
-        }
-        if (cursors.left.isDown) {
-            player.setVelocityX(-this.MAX_SPEED);
-            this.playerBod.setFlipX(true);
-            this.playerHair.setFlipX(true);
-            this.playerTool.setFlipX(true);
-        } else if (cursors.right.isDown) {
-            player.setVelocityX(this.MAX_SPEED);
-            this.playerBod.setFlipX(false);
-            this.playerHair.setFlipX(false);
-            this.playerTool.setFlipX(false);
-        }
-
-        if (cursors.up.isDown) {
-            player.setVelocityY(-this.MAX_SPEED);
-        } else if (cursors.down.isDown) {
-            player.setVelocityY(this.MAX_SPEED);
-        }
+        return grid;
     }
 }
-*/

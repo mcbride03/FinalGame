@@ -60,7 +60,7 @@ class Game extends Phaser.Scene {
 
         this.spawnX = this.goblinDefeated ?  775 : 100;
         this.spawnY = this.goblinDefeated ?  25 : 100;
-        this.playerObj = new Player(this, this.spawnX, this.spawnY, { hasSword: this.hasSword });
+        this.playerObj = new Player(this, this.spawnX, this.spawnY, { hasSword: this.hasSword }, null);
         this.player = this.playerObj.getContainer(); // For camera and collisions
 
         this.physics.add.collider(this.player, this.buildingLayer);
@@ -77,7 +77,7 @@ class Game extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
         const dialogueJson = this.cache.json.get('dialogueData');
-        this.Frank = new Npc(this, 443, 344, "idle_bod", "idle_hair", this.player, "idle", "idle_h", dialogueJson.NPCs, "NPC_Frank");
+        this.Frank = new Npc(this, 443, 344, "idle_bod", "idle_hair", this.player, "idle", "idle_h_spike", dialogueJson.NPCs, "NPC_Frank");
 
         cursors = this.input.keyboard.createCursorKeys();
         this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
@@ -99,11 +99,34 @@ class Game extends Phaser.Scene {
                 });
             });
         }
+// ************** UI CREATION *****************************
+        this.UI_space = this.add.sprite(-100, -100, 'SPACEKEY', 0)
+            .setOrigin(0, 0)
+            .setScale(0.5)
+            .setDepth(100);
+        this.UI_attack = this.add.bitmapText(-100, -100, 'font', 'Attack', 16)
+            .setOrigin(0, 0)
+            .setScale(0.5)
+            .setTint(0xffffff)
+            .setDepth(100);
+        
+        this.UI_z = this.add.sprite(10, 10, 'ZKEY', 0)
+            .setOrigin(0, 0)
+            .setScale(0.5)
+            .setDepth(100);    
+        this.UI_interact = this.add.bitmapText(10, 10, 'font', 'Interact', 16)
+            .setOrigin(0, 0)
+            .setScale(0.5)
+            .setTint(0xffffff)
+            .setDepth(100);
+// ***********************************************************************
 
         this.animatedTiles.init(this.map);
     }
 
     update() {
+        this.updateUI();
+
         this.dialogueActive = this.Frank.update();
 
         this.playerObj.update();
@@ -118,6 +141,21 @@ class Game extends Phaser.Scene {
                 goblinDefeated: this.goblinDefeated
             });
         }
+    }
+
+    updateUI() {
+        const cam = this.cameras.main;
+        const x = cam.scrollX + cam.width / 2.75;
+        const y = cam.scrollY + cam.height / 1.6;
+        if (!this.playerObj.getHasSword()) {
+            this.UI_interact.setPosition(x + this.UI_z.width, y);
+            this.UI_z.setPosition(x, y);
+            return;
+        }
+        this.UI_attack.setPosition(x + this.UI_space.width / 1.66, y);
+        this.UI_space.setPosition(x, y);
+        this.UI_interact.setPosition(x + this.UI_z.width, y - 20);
+        this.UI_z.setPosition(x, y - 20);
     }
 
     pickupSword() {

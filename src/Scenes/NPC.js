@@ -51,7 +51,7 @@ class Npc {
             .setVisible(false);
 
         this.typing = this.scene.plugins.get('rextexttypingplugin').add(this.dialogueText, {
-            speed: 50
+            speed: 25
         });
 
         this.interactKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
