@@ -12,6 +12,7 @@ class Load extends Phaser.Scene {
 
         this.load.setPath("./assets/");
 
+        this.load.image('titleScreen', 'TitleScreen.png');
         this.load.image('sword', 'Sunnyside_World_Assets/UI/sword.png');
         // Load character spritesheet
         this.load.atlas("topdown_characters", "/kenney_roguelike-characters/Spritesheet/roguelikeChar_transparent.png", "roguelikeChar_transparent.json")
@@ -305,7 +306,7 @@ class Load extends Phaser.Scene {
             repeat: 2
         });
 
-        this.scene.start("gameScene");
+        this.scene.start("titleScene");
     }
     update() {
 

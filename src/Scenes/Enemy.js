@@ -50,7 +50,6 @@ class Enemy {
         }
 
         if (this.path.length <= 1 || this.nextStepIndex >= this.path.length) {
-            //this.enemy.setVelocity(0);       // <- Stop movement
             this.playIdle();
             return;
         }
