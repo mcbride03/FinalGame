@@ -86,11 +86,6 @@ class Player {
                 this.container.body.setVelocity(0); 
             } 
         }
-        
-        // Update attack hitbox position if attacking
-        if (this.isAttacking) {
-            this.updateAttackHitboxPosition();
-        }
 
         // lock player movement for knockback and dialogue but set velocity to 0 for dialogue only
         if (this.isKnockedBack) {} 
@@ -99,6 +94,11 @@ class Player {
         } else {
             // Only allow player movement if not knocked back AND not in dialogue
             this.playerMovement();
+        }
+
+        // Update attack hitbox position if attacking
+        if (this.isAttacking) {
+            this.updateAttackHitboxPosition();
         }
 
         // Allow attack input unless dialogue active or already attacking
@@ -218,7 +218,9 @@ class Player {
         // Once damage animation is complete, reset flags
         this.playerBod.once("animationcomplete-damage_b", () => {
             this.takeDmg = false;
-            this.canBeHit = true;
+            this.scene.time.delayedCall(200, () => {
+                this.canBeHit = true;
+            });
         });
     }
 

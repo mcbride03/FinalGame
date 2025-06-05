@@ -66,7 +66,7 @@ class Forest extends Phaser.Scene {
         // player takes damage if they collide with enemy
         this.physics.add.collider(this.player, this.enemies, (player, enemySprite) => {
             const enemy = enemySprite.getData('ref');
-            if (enemy && this.playerObj.canBeHit && !this.playerObj.isDead) {
+            if (enemy && this.playerObj.canBeHit && !this.playerObj.isDead && enemy.canAttack) {
                 this.playerObj.health -= 25;
                 this.playerObj.takeDmg = true;
                 this.playerObj.canBeHit = false;
@@ -79,8 +79,10 @@ class Forest extends Phaser.Scene {
         // enemy takes damage if hit by attack hitbox 
         this.physics.add.overlap(this.playerObj.attackHitbox, this.enemies, (hitbox, enemySprite) => {
             const enemy = enemySprite.getData('ref');
+            enemy.canAttack = false;
             if (enemy && enemy.canBeHit) {
-                this.time.delayedCall(300, () => {
+                this.time.delayedCall(100, () => {
+                    enemy.canAttack = true;
                     enemy.takeDamage(this.playerObj.swordDamage); 
                 });
             }

@@ -26,6 +26,7 @@ class Enemy {
         
         this.canBeHit = true; 
         this.isDead = false;
+        this.canAttack = true;
 
         this.health = (this.enemyId == "Enemy_Goblin") ? 100 : 50; // Set health based on enemyId
 
