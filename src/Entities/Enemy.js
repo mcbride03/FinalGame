@@ -1,5 +1,19 @@
-// key for anims array order:
-//    0: idle, 1: walk, 2: attack, 3: damage, 4: death
+// Class for Enemy creation
+// 
+//    Parameter Guide:
+//      scene ------------------------- spawn scene
+//      x, y -------------------------- spawn location
+//      texture ----------------------- sprite texture
+//      player ------------------------ player object
+//      anims ------------------------- array of animation keys
+//      enemyId ----------------------- Id for enemy
+//    ENEMY PATHFINDING:
+//      finder ------------------------ easystar finder
+//      tilemap ----------------------- scene map (this.map)
+//      grid -------------------------- 2d array mapped by layers (use layers to grid function)
+//
+//    Key for anims array order:
+//      0: idle, 1: walk, 2: attack, 3: damage, 4: death
 class Enemy {
     constructor(scene, x, y, texture, player, anims, enemyId, finder, tilemap, grid){
         this.scene = scene;
@@ -13,16 +27,16 @@ class Enemy {
         this.canBeHit = true; 
         this.isDead = false;
 
-        this.health = (enemyId == "Enemy_Goblin") ? 100 : 50; // Set health based on enemyId
+        this.health = (this.enemyId == "Enemy_Goblin") ? 100 : 50; // Set health based on enemyId
 
         this.enemy = this.scene.physics.add.sprite(x, y, texture);
         this.enemy.setData('ref', this);  // Store reference to the Enemy class instance
-        this.enemy.body.setSize(18, 18);
+        this.enemy.body.setSize(16, 16);
         this.enemy.body.setImmovable(true);
         this.enemy.setDepth(2);
         this.enemy.setDepth(2); // Set depth for correct layering
 
-        // Play initial animation if available
+        // Play idle animation if available
         if (this.anims[0]) {
             this.enemy.play(this.anims[0], true); // Ensure looping for idle animation
         }
@@ -39,60 +53,90 @@ class Enemy {
     }
 
     update() {
-        // Handle health/death state first
-        if (this.isDead || this.isTakingDamage) {
-            return; // If dead, do nothing else
-        }
+        // skip update if dead or damaged
+        if (this.isDead || this.isTakingDamage) return;
 
+        // play death animation on death
         if (this.health <= 0) {
             this.playDeath();
-            return; // Prevent rest of update if dying
-        }
-
-        if (this.path.length <= 1 || this.nextStepIndex >= this.path.length) {
-            this.playIdle();
             return;
         }
-        
-        const nextTile = this.path[this.nextStepIndex];
-        const targetX = nextTile.x * this.map.tileWidth;
-        const targetY = nextTile.y * this.map.tileHeight;
 
-        const dx = targetX - this.enemy.x;
-        const dy = targetY - this.enemy.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        // get distance between player and enemy
+        const playerX = this.player.getX();
+        const playerY = this.player.getY();
+        const dx = playerX - this.enemy.x;
+        const dy = playerY - this.enemy.y;
+        const distToPlayer = Math.sqrt(dx * dx + dy * dy);
 
-        const speed = 50;
-        if (dist > 2) {
-            this.enemy.setVelocity((dx / dist) * speed, (dy / dist) * speed);
+        const speed = 40;
+
+        // If close enough to player, skip path and walk directly toward them
+        if (distToPlayer < 20) {
+            const len = distToPlayer || 1; // avoid dividing by 0
+            this.enemy.setVelocity((dx / len) * speed, (dy / len) * speed); 
+            // play walking animation if not currently walking
             if (this.enemy.anims.currentAnim?.key !== this.anims[1]) {
                 this.enemy.play(this.anims[1], true);
             }
+            return;
+        }
+
+        // If no path or at the end of the path, stop moving
+        if (this.path.length <= 1 || this.nextStepIndex >= this.path.length) {
+            this.enemy.setVelocity(0);
+            this.playIdle();
+            return;
+        }
+
+        // move toward next tile in path
+        const nextTile = this.path[this.nextStepIndex];
+        const targetX = nextTile.x * this.map.tileWidth + this.map.tileWidth / 2;
+        const targetY = nextTile.y * this.map.tileHeight + this.map.tileHeight / 2;
+
+        const dxPath = targetX - this.enemy.x;
+        const dyPath = targetY - this.enemy.y;
+        const distPath = Math.sqrt(dxPath * dxPath + dyPath * dyPath);
+
+        // If not yet close enough to the tile, keep moving toward it
+        if (distPath > 2) {
+            this.enemy.setVelocity((dxPath / distPath) * speed, (dyPath / distPath) * speed);
+            
+            // Play walking animation
+            if (this.enemy.anims.currentAnim?.key !== this.anims[1]) {
+                this.enemy.play(this.anims[1], true); // walk
+            }
         } else {
+            // Reached current tile target, move to next
             this.nextStepIndex++;
         }
     }
     
     findPathToPlayer() {
-        if (this.findingPath) return; // prevent overlap
+        if (this.findingPath) return; // prevent overlap path requests
+        
+        // Helper to keep values inside map bounds
         const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+        
+        // Convert world coordinates to tile coordinates
         const fromX = clamp(this.map.worldToTileX(this.enemy.x), 0, this.map.width - 1);
         const fromY = clamp(this.map.worldToTileY(this.enemy.y), 0, this.map.height - 1);
         const toX = clamp(this.map.worldToTileX(this.player.getX()), 0, this.map.width - 1);
         const toY = clamp(this.map.worldToTileY(this.player.getY()), 0, this.map.height - 1);
         
+        // use easystar to calculate a path
         this.finder.findPath(fromX, fromY, toX, toY, (path) => {
             
             if (path === null) {
                 console.warn("Path was not found.");
             }
+            // If a valid path was found, store it and reset step index
             if (path && path.length > 1) {
                 this.path = path;
                 this.nextStepIndex = 1;  // skip current position
             }
         });
         this.finder.calculate();
-        
     }
     
     playIdle() {

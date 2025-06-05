@@ -1,9 +1,11 @@
+// Forest scene, player fights goblin here
 class Forest extends Phaser.Scene {
     constructor() {
         super("forestScene");
     }
 
     init(data) {
+        // game state data
         this.hasSword = data.hasSword || false;
         this.canPickupSword = data.canPickupSword || false;
         this.hasTalkedToFrank = data.hasTalkedToFrank || false;
@@ -11,6 +13,7 @@ class Forest extends Phaser.Scene {
     }
 
     preload() {
+        // load animated tiles if there are any
         this.load.scenePlugin('AnimatedTiles', './lib/AnimatedTiles.js', 'animatedTiles', 'animatedTiles');
     }
 
@@ -19,8 +22,6 @@ class Forest extends Phaser.Scene {
         this.map = this.add.tilemap("topDown-level-2", 16, 16, 45, 25);
 
         // Add a tileset to the map
-        // First parameter: name we gave the tileset in Tiled
-        // Second parameter: key for the tilesheet (from this.load.image in Load.js)
         this.tileset = this.map.addTilesetImage("tilemap_new", "tilemap_new");
 
         // create layers
@@ -28,31 +29,41 @@ class Forest extends Phaser.Scene {
         this.pathLayer = this.map.createLayer("Paths", this.tileset, 0, 0);
         this.treeLayer = this.map.createLayer("Trees", this.tileset, 0, 0);
 
+        // set up easystar
         this.grid = this.layersToGrid([this.pathLayer]);
         this.finder = new EasyStar.js();
         this.finder.setGrid(this.grid);
         this.finder.setAcceptableTiles([0, 522, 523, 460, 68, 458, 459]);
 
-        // collision
+        // tree collision setup
         this.treeLayer.setCollisionByProperty({ collides: true });
 
+        // create enemy group
         this.enemies = this.physics.add.group();
 
-        this.playerObj = new Player(this, this.map.widthInPixels / 2, this.map.heightInPixels - 25, { hasSword: this.hasSword }, this.enemies);
+        // create player with saved game state
+        this.playerObj = new Player(this, this.map.widthInPixels / 2, this.map.heightInPixels - 25, { hasSword: this.hasSword });
         this.player = this.playerObj.getContainer();
         this.player.setDepth(3);
 
+        // player collision on tree layer
         this.physics.add.collider(this.player, this.treeLayer);
 
+        // spawn goblin if he is not yet defeated
         if (!this.goblinDefeated) {
             this.goblinSpawnX = this.map.widthInPixels / 2;
             this.goblinSpawnY = this.map.heightInPixels / 4;
+            
+            // create goblin as enemy class; pass: scene, spawn loaction, player, animations/sprites, enemy key, and finder/map/grid for easystar
             this.goblin = new Enemy(this, this.goblinSpawnX, this.goblinSpawnY, "idle_gob", this.playerObj, 
                 ["idle_g", "walk_g", "attack_g", "damage_g", "death_g"], "Enemy_Goblin", this.finder, this.map, this.grid);
-            this.enemies.add(this.goblin.enemy);
+            this.enemies.add(this.goblin.enemy);    //add goblin to enemy group
             this.goblin.enemy.body.setImmovable(true);
+            this.physics.add.collider(this.goblin.enemy, this.treeLayer);
+
         }
         
+        // player takes damage if they collide with enemy
         this.physics.add.collider(this.player, this.enemies, (player, enemySprite) => {
             const enemy = enemySprite.getData('ref');
             if (enemy && this.playerObj.canBeHit && !this.playerObj.isDead) {
@@ -60,11 +71,12 @@ class Forest extends Phaser.Scene {
                 this.playerObj.takeDmg = true;
                 this.playerObj.canBeHit = false;
 
-                // Knockback!
+                // Knockback player when hit
                 this.playerObj.knockback(enemySprite.x, enemySprite.y);
-            }   
+            }
         });
 
+        // enemy takes damage if hit by attack hitbox 
         this.physics.add.overlap(this.playerObj.attackHitbox, this.enemies, (hitbox, enemySprite) => {
             const enemy = enemySprite.getData('ref');
             if (enemy && enemy.canBeHit) {
@@ -74,13 +86,16 @@ class Forest extends Phaser.Scene {
             }
         });
 
+        // camera set up
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.startFollow(this.player, true, 0.25, 0.25);
         this.cameras.main.setDeadzone(75, 75);
         this.cameras.main.setZoom(3.5);
 
+        // limit player to map
         this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
+        // input
         this.cursors = this.input.keyboard.createCursorKeys();
 
 // ************** UI CREATION *****************************
@@ -107,13 +122,19 @@ class Forest extends Phaser.Scene {
     }
 
     update() {
+        // keep UI moving with camera
         this.updateUI();
+
+        // update player
         this.playerObj.update();
 
+        // if goblin is spawned update
         if (this.goblin) {
             this.goblin.update();
         }
 
+        // if goblin defeated and the player leaves map
+        // send player back to the town with updated game state
         if (this.goblinDefeated && this.player.body.y >= 455) {
             this.scene.start("gameScene", {
                 hasSword: this.playerObj.getHasSword(),
@@ -123,7 +144,9 @@ class Forest extends Phaser.Scene {
             });
         }
     }
+    
     updateUI() {
+        // helper function to keep UI in place with camera
         const cam = this.cameras.main;
         const x = cam.scrollX + cam.width / 2.75;
         const y = cam.scrollY + cam.height / 1.6;
@@ -139,6 +162,7 @@ class Forest extends Phaser.Scene {
     }
 
     layersToGrid(layers) {
+        // helper function to translate tilemap to 2d array for easystar
         let grid = [];
         for (let y = 0; y < this.map.height; y++) {
             let row = [];

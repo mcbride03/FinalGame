@@ -5,28 +5,26 @@ class Load extends Phaser.Scene {
     }
 
     preload() {
-        this.load.plugin('rextagtextplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextagtextplugin.min.js', true);
+
+        // load type-writer dialogue plugin
         this.load.plugin('rextexttypingplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexttypingplugin.min.js', true);  
 
-        this.load.json('dialogueData', 'src/Scenes/Dialogue.json');
+        // load dialogue file
+        this.load.json('dialogueData', 'src/Data/Dialogue.json');
 
         this.load.setPath("./assets/");
 
         this.load.image('titleScreen', 'TitleScreen.png');
         this.load.image('sword', 'Sunnyside_World_Assets/UI/sword.png');
-        // Load character spritesheet
-        this.load.atlas("topdown_characters", "/kenney_roguelike-characters/Spritesheet/roguelikeChar_transparent.png", "roguelikeChar_transparent.json")
-        // this.load.atlas("sunny_character_idle","/Sunnyside_World_Assets/Chracters/Human/IDLE/base_idle_strip9.png", "")
-
+        
         // Load tilemap information
-        this.load.image("kenney_Indoor", "kenney_roguelike-indoors/Tilesheets/roguelikeIndoor_transparent.png");
         this.load.image("kenney_RPG", "kenney_roguelike-rpg-pack/Spritesheet/roguelikeSheet_transparent.png");
         this.load.atlasXML("kenney_UI_atlas", "kenney_ui-pack-rpg-expansion/Spritesheet/uipack_rpg_sheet.png", "kenney_ui-pack-rpg-expansion/Spritesheet/uipack_rpg_sheet.xml");
         this.load.image("sunnyside_tilemap", "Sunnyside_World_Assets/Tileset/spr_tileset_sunnysideworld_16px.png");
 
+        // UI key images
         this.load.image('SPACEKEY', 'SimpleKeys/SimpleKeys/Jumbo/Light/Single PNGs/SPACE.png');
         this.load.image('ZKEY', 'SimpleKeys/SimpleKeys/Jumbo/Light/Single PNGs/Z.png');
-
 
         // Load bitmap
         this.load.bitmapFont('font', '/pixel_fonts/fonts/minogram_6x10.png', '/pixel_fonts/fonts/minogram_6x10.xml');
@@ -39,13 +37,28 @@ class Load extends Phaser.Scene {
             frameWidth: 96,
             frameHeight: 64
         });
-        // hair
+        // hair curly
         this.load.spritesheet('idle_hair', 'Sunnyside_World_Assets/Characters/Human/IDLE/curlyhair_idle_strip9.png', {
             frameWidth: 96,
             frameHeight: 64
         });
-        // hair 1
-        this.load.spritesheet('idle_hair_1', 'Sunnyside_World_Assets/Characters/Human/IDLE/spikeyhair_idle_strip9.png', {
+        // hair spikey
+        this.load.spritesheet('idle_hair_spikey', 'Sunnyside_World_Assets/Characters/Human/IDLE/spikeyhair_idle_strip9.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // hair long
+        this.load.spritesheet('idle_hair_long', 'Sunnyside_World_Assets/Characters/Human/IDLE/longhair_idle_strip9.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // hair mop
+        this.load.spritesheet('idle_hair_mop', 'Sunnyside_World_Assets/Characters/Human/IDLE/mophair_idle_strip9.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // hair short
+        this.load.spritesheet('idle_hair_short', 'Sunnyside_World_Assets/Characters/Human/IDLE/shorthair_idle_strip9.png', {
             frameWidth: 96,
             frameHeight: 64
         });
@@ -135,6 +148,132 @@ class Load extends Phaser.Scene {
             frameWidth: 96,
             frameHeight: 64
         });
+      // ----- ACTIONS -----
+      // axe  
+        // body
+        this.load.spritesheet('axe_bod', 'Sunnyside_World_Assets/Characters/Human/AXE/base_axe_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // hair
+        this.load.spritesheet('axe_hair', 'Sunnyside_World_Assets/Characters/Human/AXE/curlyhair_axe_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('axe_hair_bowl', 'Sunnyside_World_Assets/Characters/Human/AXE/bowlhair_axe_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('axe_hair_long', 'Sunnyside_World_Assets/Characters/Human/AXE/longhair_axe_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('axe_hair_mop', 'Sunnyside_World_Assets/Characters/Human/AXE/mophair_axe_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('axe_hair_short', 'Sunnyside_World_Assets/Characters/Human/AXE/shorthair_axe_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('axe_tool', 'Sunnyside_World_Assets/Characters/Human/AXE/tools_axe_strip10.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+      // dig  
+        // body
+        this.load.spritesheet('dig_bod', 'Sunnyside_World_Assets/Characters/Human/DIG/base_dig_strip13.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // hair
+        this.load.spritesheet('dig_hair', 'Sunnyside_World_Assets/Characters/Human/DIG/curlyhair_dig_strip13.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('dig_hair_bowl', 'Sunnyside_World_Assets/Characters/Human/DIG/bowlhair_dig_strip13.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('dig_hair_long', 'Sunnyside_World_Assets/Characters/Human/DIG/longhair_dig_strip13.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('dig_hair_mop', 'Sunnyside_World_Assets/Characters/Human/DIG/mophair_dig_strip13.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('dig_hair_short', 'Sunnyside_World_Assets/Characters/Human/DIG/shorthair_dig_strip13.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('dig_tool', 'Sunnyside_World_Assets/Characters/Human/DIG/tools_dig_strip13.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+      // hammering  
+        // body
+        this.load.spritesheet('hammer_bod', 'Sunnyside_World_Assets/Characters/Human/HAMMERING/base_hamering_strip23.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // hair
+        this.load.spritesheet('hammer_hair', 'Sunnyside_World_Assets/Characters/Human/HAMMERING/curlyhair_hamering_strip23.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('hammer_hair_bowl', 'Sunnyside_World_Assets/Characters/Human/HAMMERING/bowlhair_hamering_strip23.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('hammer_hair_long', 'Sunnyside_World_Assets/Characters/Human/HAMMERING/longhair_hamering_strip23.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('hammer_hair_mop', 'Sunnyside_World_Assets/Characters/Human/HAMMERING/mophair_hamering_strip23.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('hammer_hair_short', 'Sunnyside_World_Assets/Characters/Human/HAMMERING/shorthair_hamering_strip23.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('hammer_tool', 'Sunnyside_World_Assets/Characters/Human/HAMMERING/tools_hamering_strip23.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+      // watering  
+        // body
+        this.load.spritesheet('watering_bod', 'Sunnyside_World_Assets/Characters/Human/WATERING/base_watering_strip5.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        // hair
+        this.load.spritesheet('watering_hair', 'Sunnyside_World_Assets/Characters/Human/WATERING/curlyhair_watering_strip5.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('watering_hair_bowl', 'Sunnyside_World_Assets/Characters/Human/WATERING/bowlhair_watering_strip5.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('watering_hair_long', 'Sunnyside_World_Assets/Characters/Human/WATERING/longhair_watering_strip5.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('watering_hair_mop', 'Sunnyside_World_Assets/Characters/Human/WATERING/mophair_watering_strip5.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('watering_hair_short', 'Sunnyside_World_Assets/Characters/Human/WATERING/shorthair_watering_strip5.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+        this.load.spritesheet('watering_tool', 'Sunnyside_World_Assets/Characters/Human/WATERING/tools_watering_strip5.png', {
+            frameWidth: 96,
+            frameHeight: 64
+        });
+
 // ====================================================================================================================================================================== //
 
         // Load keypress animation spritesheets
@@ -143,12 +282,10 @@ class Load extends Phaser.Scene {
             frameHeight: 21
         });
 
-
-
         this.load.tilemapTiledJSON("topDown-level-1", "topDown-level-1.tmj");   // Tilemap in JSON
         this.load.tilemapTiledJSON("topDown-level-2", "topDown-level-2.tmj");   // Tilemap in JSON
 
-        // Load the tilemap as a spritesheet
+        // Load the Tiled tilemap as a spritesheet
         this.load.spritesheet("tilemap_RPG", "kenney_roguelike-rpg-pack/Spritesheet/roguelikeSheet_transparent.png", {
             frameWidth: 16,
             frameHeight: 16,
@@ -180,8 +317,29 @@ class Load extends Phaser.Scene {
         
         // idle hair spikey animation
         this.anims.create({
-            key: 'idle_h_spike',
-            frames: this.anims.generateFrameNumbers('idle_hair_1', { start: 0, end: 8 }),
+            key: 'idle_h_spikey',
+            frames: this.anims.generateFrameNumbers('idle_hair_spikey', { start: 0, end: 8 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // idle hair long animation
+        this.anims.create({
+            key: 'idle_h_long',
+            frames: this.anims.generateFrameNumbers('idle_hair_long', { start: 0, end: 8 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // idle hair mop animation
+        this.anims.create({
+            key: 'idle_h_mop',
+            frames: this.anims.generateFrameNumbers('idle_hair_mop', { start: 0, end: 8 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // idle hair short animation
+        this.anims.create({
+            key: 'idle_h_short',
+            frames: this.anims.generateFrameNumbers('idle_hair_short', { start: 0, end: 8 }),
             frameRate: 12,
             repeat: -1
         });
@@ -190,7 +348,8 @@ class Load extends Phaser.Scene {
         this.anims.create({
             key: 'idle_t',
             frames: this.anims.generateFrameNumbers('idle_tool', { start: 0, end: 8}),
-            frameRate: 12
+            frameRate: 12,
+            repeat: -1
         });
 
         // idle goblin animation
@@ -298,6 +457,218 @@ class Load extends Phaser.Scene {
             frameRate:12
         });
 
+        // axe body animation
+        this.anims.create({
+            key: 'axe_b',
+            frames: this.anims.generateFrameNumbers('axe_bod', { start: 0, end: 9 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // axe hair animation
+        this.anims.create({
+            key: 'axe_h',
+            frames: this.anims.generateFrameNumbers('axe_hair', { start: 0, end: 9 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        
+        // axe hair long animation
+        this.anims.create({
+            key: 'axe_h_long',
+            frames: this.anims.generateFrameNumbers('axe_hair_long', { start: 0, end: 9 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // axe hair mop animation
+        this.anims.create({
+            key: 'axe_h_mop',
+            frames: this.anims.generateFrameNumbers('axe_hair_mop', { start: 0, end: 9 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // axe hair short animation
+        this.anims.create({
+            key: 'axe_h_short',
+            frames: this.anims.generateFrameNumbers('axe_hair_short', { start: 0, end: 9 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // axe hair bowl animation
+        this.anims.create({
+            key: 'axe_h_bowl',
+            frames: this.anims.generateFrameNumbers('axe_hair_bowl', { start: 0, end: 9 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // axe tool animation
+        this.anims.create({
+            key: 'axe_t',
+            frames: this.anims.generateFrameNumbers('axe_tool', { start: 0, end: 9}),
+            frameRate: 12,
+            repeat: -1,
+        });
+    
+        // dig body animation
+        this.anims.create({
+            key: 'dig_b',
+            frames: this.anims.generateFrameNumbers('dig_bod', { start: 0, end: 12 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // dig hair animation
+        this.anims.create({
+            key: 'dig_h',
+            frames: this.anims.generateFrameNumbers('dig_hair', { start: 0, end: 12 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        
+        // dig hair long animation
+        this.anims.create({
+            key: 'dig_h_long',
+            frames: this.anims.generateFrameNumbers('dig_hair_long', { start: 0, end: 12 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // dig hair mop animation
+        this.anims.create({
+            key: 'dig_h_mop',
+            frames: this.anims.generateFrameNumbers('dig_hair_mop', { start: 0, end: 12 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // dig hair short animation
+        this.anims.create({
+            key: 'dig_h_short',
+            frames: this.anims.generateFrameNumbers('dig_hair_short', { start: 0, end: 12 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // dig hair bowl animation
+        this.anims.create({
+            key: 'dig_h_bowl',
+            frames: this.anims.generateFrameNumbers('dig_hair_bowl', { start: 0, end: 12 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // dig tool animation
+        this.anims.create({
+            key: 'dig_t',
+            frames: this.anims.generateFrameNumbers('dig_tool', { start: 0, end: 12}),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // hammering body animation
+        this.anims.create({
+            key: 'hammer_b',
+            frames: this.anims.generateFrameNumbers('hammer_bod', { start: 0, end: 22 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // hammering hair animation
+        this.anims.create({
+            key: 'hammer_h',
+            frames: this.anims.generateFrameNumbers('hammer_hair', { start: 0, end: 22 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        
+        // hammering hair long animation
+        this.anims.create({
+            key: 'hammer_h_long',
+            frames: this.anims.generateFrameNumbers('hammer_hair_long', { start: 0, end: 22 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // hammering hair mop animation
+        this.anims.create({
+            key: 'hammer_h_mop',
+            frames: this.anims.generateFrameNumbers('hammer_hair_mop', { start: 0, end: 22 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // hammering hair short animation
+        this.anims.create({
+            key: 'hammer_h_short',
+            frames: this.anims.generateFrameNumbers('hammer_hair_short', { start: 0, end: 22 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // hammering hair bowl animation
+        this.anims.create({
+            key: 'hammer_h_bowl',
+            frames: this.anims.generateFrameNumbers('hammer_hair_bowl', { start: 0, end: 22 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // hammering tool animation
+        this.anims.create({
+            key: 'hammer_t',
+            frames: this.anims.generateFrameNumbers('hammer_tool', { start: 0, end: 22}),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // watering body animation
+        this.anims.create({
+            key: 'watering_b',
+            frames: this.anims.generateFrameNumbers('watering_bod', { start: 0, end: 4 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // watering hair animation
+        this.anims.create({
+            key: 'watering_h',
+            frames: this.anims.generateFrameNumbers('watering_hair', { start: 0, end: 4 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        
+        // watering hair long animation
+        this.anims.create({
+            key: 'watering_h_long',
+            frames: this.anims.generateFrameNumbers('watering_hair_long', { start: 0, end: 4 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // watering hair mop animation
+        this.anims.create({
+            key: 'watering_h_mop',
+            frames: this.anims.generateFrameNumbers('watering_hair_mop', { start: 0, end: 4 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // watering hair short animation
+        this.anims.create({
+            key: 'watering_h_short',
+            frames: this.anims.generateFrameNumbers('watering_hair_short', { start: 0, end: 4 }),
+            frameRate: 12,
+            repeat: -1
+        });
+        // watering hair bowl animation
+        this.anims.create({
+            key: 'watering_h_bowl',
+            frames: this.anims.generateFrameNumbers('watering_hair_bowl', { start: 0, end: 4 }),
+            frameRate: 12,
+            repeat: -1
+        });
+
+        // watering tool animation
+        this.anims.create({
+            key: 'watering_t',
+            frames: this.anims.generateFrameNumbers('watering_tool', { start: 0, end: 4}),
+            frameRate: 12,
+            repeat: -1
+        });
+
         // space animation
         this.anims.create({
             key: 'space',
@@ -306,6 +677,7 @@ class Load extends Phaser.Scene {
             repeat: 2
         });
 
+        // start title scene
         this.scene.start("titleScene");
     }
     update() {

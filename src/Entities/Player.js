@@ -1,9 +1,15 @@
+// Class for Player creation
+// 
+//    Parameter Guide:
+//      scene ------------------------- spawn scene
+//      x, y -------------------------- spawn location
+//      hasSword ---------------------- retrieve from game state
+//
 class Player {
-    constructor(scene, x, y, hasSword, enemiesGroup) {
+    constructor(scene, x, y, hasSword) {
         this.scene = scene;
         this.hasSword = hasSword?.hasSword || false;
         this.isAttacking = false;
-        this.enemies = enemiesGroup;
         this.swordDamage = 25;
         this.health = 100;
         this.takeDmg = false;
@@ -16,7 +22,7 @@ class Player {
         this.playerHair = scene.add.sprite(0, 0, "idle_hair", 0);
         this.playerTool = scene.add.sprite(0, 0, "idle_tool", 0).setVisible(false);
 
-        // Group into a container
+        // Group sprites into a container
         this.container = scene.add.container(x, y, [this.playerBod, this.playerHair, this.playerTool]).setDepth(2);
 
         // Enable physics
@@ -26,14 +32,14 @@ class Player {
         body.setSize(16, 16);
         body.setOffset(-8, -8);
 
-        // sword hitbox
+        // sword hitbox creation
         this.attackHitbox = this.scene.physics.add.sprite(0, 0, null);
         this.attackHitbox.setSize(24, 28);
         this.attackHitbox.setVisible(false);
         this.attackHitbox.body.allowGravity = false;
-        this.attackHitbox.body.enable = false;
+        this.attackHitbox.body.enable = false; // disable initially
 
-        // Load Restart UI
+        // Load Restart UI and hide visibility
         this.restartBox = this.scene.add.sprite(0, 0, "kenney_UI_atlas", "buttonLong_brown.png")
             .setOrigin(0.5)
             .setDepth(100)
@@ -50,7 +56,7 @@ class Player {
         this.cursors = scene.input.keyboard.createCursorKeys();
         this.restartKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
-        // debugging
+        // vvvv uncomment below for attack debugging vvvv
         // this.hasSword = true;
         // this.debugGraphics = this.scene.add.graphics();
         // this.debugGraphics.setDepth(100); // Ensure it draws on top   
@@ -59,16 +65,21 @@ class Player {
 
     update() {
 
+        // if dead and press R restart the scene
         if (this.isDead && this.restartKey && Phaser.Input.Keyboard.JustDown(this.restartKey)) {
             this.scene.scene.restart(); // Restart the scene
         }
         
+        // if dead skip the rest of update
         if (this.isDead) return;
 
+        // if dying play death animation and skip rest of update
         if (this.health <= 0 && !this.isDead) {
             this.playDeath();
             return;
         }
+
+        // if taking damage play damage animation and kock player back
         if (this.takeDmg) {
             this.playDamage();
             if (!this.isKnockedBack) { 
@@ -81,9 +92,8 @@ class Player {
             this.updateAttackHitboxPosition();
         }
 
-        if (this.isKnockedBack) {
-            // this.cancelAttack();
-        } 
+        // lock player movement for knockback and dialogue but set velocity to 0 for dialogue only
+        if (this.isKnockedBack) {} 
         else if (this.scene.dialogueActive) {
              this.container.body.setVelocity(0); // Stop player input for dialogue
         } else {
@@ -95,7 +105,7 @@ class Player {
         if (!this.isAttacking && !this.takeDmg && !this.isDead && !this.isKnockedBack && !this.scene.dialogueActive && this.hasSword && Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
             this.attack();
         }
-        // this.drawDebugHitbox(); // Uncomment for debugging
+        // this.drawDebugHitbox(); // Uncomment for debugging (shows sword hitbox)
     }
 
     playerMovement() {
@@ -175,7 +185,7 @@ class Player {
         });
     }
 
-    // New method to update hitbox position dynamically
+    // update hitbox position dynamically
     updateAttackHitboxPosition() {
         const playerX = this.container.body.x + this.container.body.width / 2;
         const playerY = this.container.body.y + this.container.body.height / 2;
@@ -213,17 +223,20 @@ class Player {
     }
 
     playDeath() {
+        // skip if animation is in progress
         if (this.isDead || this.playerBod.anims.currentAnim?.key === "death_b") return;
+        // set death flag and cancel and attacks
         this.isDead = true;
         this.cancelAttack();
 
+        // stop player movement, play death animation, disable hitbox
         this.container.body.setVelocity(0, 0);
         this.container.body.enable = false;
-        this.attackHitbox.body.enable = false;
-
+        // this.attackHitbox.body.enable = false;
         this.playerBod.play("death_b", true);
         this.playerHair.play("death_h", true);
 
+        // on completion of animation prompt respawn UI and allow player to restart
         this.playerBod.once("animationcomplete-death_b", () => {
             this.container.setVisible(false);
             const cam = this.scene.cameras.main;
@@ -240,32 +253,36 @@ class Player {
     }
 
     knockback(fromX, fromY) {
+        // cancel any attacks when knocked back
         if (this.isAttacking) {
             this.cancelAttack();
         }
         const body = this.container.body;
 
+        // distance from player to enemy
         const dx = body.x - fromX;
         const dy = body.y - fromY;
 
+        // straight line length to player from entity, default 1 to avoid division by 0 (pythagorean thm)
         const length = Math.sqrt(dx * dx + dy * dy) || 1;
+        // calculate unit vector
         const normalizedX = dx / length;
         const normalizedY = dy / length;
 
-        const knockbackForce = 100; // Tweak value
+        const knockbackForce = 100; // Tweakable value
         
+        // set knockback flag and execute knockback
         this.isKnockedBack = true; 
-
         body.setVelocity(normalizedX * knockbackForce, normalizedY * knockbackForce);
 
         // freeze input for a moment and then release knockback state
-        
         this.scene.time.delayedCall(200, () => { 
             body.setVelocity(0); // Stop movement after knockback
-            this.isKnockedBack = false;
+            this.isKnockedBack = false; // reset knockback flag
         });
     }
     cancelAttack() {
+        // cancel attack and reset hitbox
         this.isAttacking = false;
         this.playerTool.setVisible(false);
         this.attackHitbox.body.enable = false;
@@ -298,7 +315,7 @@ class Player {
 
     drawDebugHitbox() {
         this.debugGraphics.clear();
-        this.debugGraphics.lineStyle(1, 0xff0000, 1);
+        this.debugGraphics.lineStyle(1, 0xff0000, 1); // red for visual clarity
         const body = this.attackHitbox.body;
         this.debugGraphics.strokeRect(body.x, body.y, body.width, body.height);
     }

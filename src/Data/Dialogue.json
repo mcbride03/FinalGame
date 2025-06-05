@@ -1,0 +1,82 @@
+{
+    "NPCs": {
+        "NPC_Farmer0": {
+            "Intro": [
+                "Ahhh, these carrots are perfect!",
+                "Hm I don't seem to recognize you.\nYou're not from around here, are you?"
+            ],
+            "AfterIntro": [
+                "Please save us from the Goblin!"
+            ],
+            "GoblinDead": [
+                "Thank you for everything you've done!"
+            ]
+        },        
+        "NPC_Farmer1": {
+            "Intro": [
+                "Hey ur new here! Welcome!",
+                "Check out our crops!"
+            ],
+            "AfterIntro": [
+                "Please save us from the Goblin!"
+            ],
+            "GoblinDead": [
+                "However can we thank you!"
+            ]
+        },
+        "NPC_Farmer2": {
+            "Intro": [
+                "Hey newcommer! Find Frank, he'll\ngive you a job to do!"
+            ],
+            "AfterIntro": [
+                "Please save us from the Goblin!"
+            ],
+            "GoblinDead": [
+                "However can we thank you!"
+            ]
+        },
+        "NPC_Lumber0": {
+            "Intro": [
+                "Hey there wanderer. Find Frank,\nhe'll give you something to do"
+            ],
+            "AfterIntro": [
+                "The Goblin from the North is\nthreatening!",
+                "Be weary!"
+            ],
+            "GoblinDead": [
+                "Our hero!"
+            ]
+        },
+        "NPC_Hammerer0": {
+            "Intro": [
+                "Whew! This hammerin' has me\nparched!"
+            ],
+            "AfterIntro": [
+                "The Goblin from the North is\nthreatening!",
+                "Be weary!"
+            ],
+            "GoblinDead": [
+                "Our hero!"
+            ]
+        },
+        "NPC_Frank": {
+            "Intro": [
+                "Hey there wanderer. My name is Frank.",
+                "Unfortunately our town Sunnyville is in\ndanger.",
+                "The Goblin in the Northern Forest\nthreatens us.",
+                "If I lend you my sword can you help us?",
+                "...",
+                "Thank you traveler! We will forever be\nindebted to you.",
+                "The sword is on that table. Please take\nit and save our town!",
+                "You can take the path that points north.\nit will lead you to the Goblin!"
+            ],
+            "AfterIntro": [
+                "The sword is on that table.",
+                "Please take the north-bound path and\nsave us!"
+            ],
+            "GoblinDead": [
+                "Thank you for saving us! Here is the key\nto the city!"
+            ]
+        }
+    }
+}
