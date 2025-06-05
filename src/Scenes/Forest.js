@@ -82,7 +82,7 @@ class Forest extends Phaser.Scene {
             enemy.canAttack = false;
             if (enemy && enemy.canBeHit) {
                 this.time.delayedCall(100, () => {
-                    enemy.canAttack = true;
+                    // enemy.canAttack = true;
                     enemy.takeDamage(this.playerObj.swordDamage); 
                 });
             }

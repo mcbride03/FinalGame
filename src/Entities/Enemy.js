@@ -157,7 +157,8 @@ class Enemy {
 
         this.isTakingDamage = true;
         this.health -= dmg; // Apply damage
-        this.canBeHit = false; 
+        this.canBeHit = false;
+        this.canAttack = false; 
 
         this.enemy.setVelocity(0);
 
@@ -176,6 +177,7 @@ class Enemy {
 
         this.scene.time.delayedCall(900, () => {
             this.canBeHit = true; // Make enemy vulnerable again
+            this.canAttack = true;
         });
 
     }
